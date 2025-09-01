@@ -13,6 +13,9 @@
     <Reference Include="Assembly-CSharp" Publicize="True">
       <HintPath>D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="JsonSubTypes">
+      <HintPath>D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\@Mod Loader\Managed\JsonSubTypes.dll</HintPath>
+    </Reference>
     <Reference Include="Mod Loader">
       <HintPath>D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\@Mod Loader\Managed\Mod Loader.dll</HintPath>
     </Reference>
@@ -39,6 +42,9 @@
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Valve.Newtonsoft.Json">
+      <HintPath>D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="VTOLAPI">
       <HintPath>D:\Games\Steam [Software no games here]\steamapps\common\VTOL VR\@Mod Loader\Mods\VTOLAPI\VTOLAPI.dll</HintPath>

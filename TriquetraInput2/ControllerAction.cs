@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using VTOLAPI;
+using VTOLVR.DLC.Rotorcraft;
 using VTOLVR.Multiplayer;
 
 namespace Triquetra.Input
@@ -35,7 +36,8 @@ namespace Triquetra.Input
         FlatscreenCenterInteract,
         FlatscreenFoV,
         FlatscreenMoveCamera,
-        NewVRInteract
+        NewVRInteract,
+        HeloModThrottle
     }
 
     
@@ -150,6 +152,9 @@ namespace Triquetra.Input
         public static class Helicopter
         {
             internal static VRThrottle power;
+            
+            internal static bool collectiveModded;
+            
             public static void SetPower(Binding binding, int joystickValue)
             {
                 if (power == null)
@@ -177,6 +182,8 @@ namespace Triquetra.Input
         public static class Throttle
         {
             internal static VRThrottle throttle;
+            internal static AH94CollectiveFunctions collectiveFunctions;
+            
             public static void SetThrottle(Binding binding, int joystickValue)
             {
                 if (throttle == null)
@@ -196,7 +203,27 @@ namespace Triquetra.Input
             private static bool triggerPressed = false;
             public static void TriggerBrakes(Binding binding, int joystickValue)
             {
-
+                if (collectiveFunctions)
+                {
+                    if (binding.CombatCollective)
+                    {
+                    }
+                    else
+                    {
+                        if (!triggerPressed && binding.GetButtonPressed(joystickValue))
+                        {
+                            triggerPressed = true;
+                            collectiveFunctions.flightCollective.OnTriggerDown?.Invoke();
+                        }
+                        if (triggerPressed && !binding.GetButtonPressed(joystickValue))
+                        {
+                            triggerPressed = false;
+                            collectiveFunctions.flightCollective.OnTriggerUp?.Invoke();
+                        }
+                    }
+                    return;
+                }
+                
                 if (throttle == null)
                     return;
 
@@ -218,6 +245,43 @@ namespace Triquetra.Input
             private static bool thumbstickButtonPressed = false;
             public static void ThumbstickButton(Binding binding, int joystickValue)
             {
+                if (collectiveFunctions)
+                {
+                    if (binding.CombatCollective)
+                    {
+                        if (Helicopter.collectiveModded)
+                        {
+                            collectiveFunctions.CombatOnTriggerDown();
+                            collectiveFunctions.combatCollective.triggerIsDown = true;
+                        }
+
+                        if (binding.GetButtonPressed(joystickValue))
+                        {
+                            collectiveFunctions.CombatOnStickPressed();
+                        }
+                        if (thumbstickButtonPressed == false && binding.GetButtonPressed(joystickValue))
+                        {
+                            thumbstickButtonPressed = true;
+                            collectiveFunctions.CombatOnStickPressDown();
+                        }
+                        if (thumbstickButtonPressed == true && !binding.GetButtonPressed(joystickValue))
+                        {
+                            thumbstickButtonPressed = false;
+                            collectiveFunctions.CombatOnStickPressUp();
+                        }
+                        
+                        if (Helicopter.collectiveModded)
+                        {
+                            collectiveFunctions.CombatOnTriggerUp();
+                            collectiveFunctions.combatCollective.triggerIsDown = false;
+                        }
+                    }
+                    else
+                    {
+                        collectiveFunctions.FlightMenuButtonDown();
+                    }
+                    return;
+                }
                 if (throttle == null)
                     return;
 
@@ -243,7 +307,7 @@ namespace Triquetra.Input
             public static bool ThumbstickLeft = false;
             private static bool thumbstickWasZero = false;
             private static bool thumbstickWasMoving = false;
-            public static void UpdateThumbstick()
+            public static void UpdateThumbstick(Binding binding = null)
             {
                 if (throttle == null)
                     return;
@@ -257,6 +321,50 @@ namespace Triquetra.Input
                     vector.y += 1;
                 if (ThumbstickDown)
                     vector.y -= 1;
+                
+                if (collectiveFunctions && binding != null)
+                {
+                    if (binding.CombatCollective)
+                    {
+                        if (Helicopter.collectiveModded)
+                        {
+                            collectiveFunctions.CombatOnTriggerDown();
+                            collectiveFunctions.combatCollective.triggerIsDown = true;
+                        }
+                        
+                        if (vector != Vector3.zero)
+                        {
+                            thumbstickWasZero = false;
+                            collectiveFunctions.CombatOnSetThumbstick(vector);
+                            thumbstickWasMoving = true;
+                        }
+                        else
+                        {
+                            if (!thumbstickWasZero)
+                            {
+                                collectiveFunctions.CombatOnSetThumbstick(vector);
+                                thumbstickWasZero = true;
+                                thumbstickWasMoving = true;
+                            }
+                            else if (thumbstickWasMoving)
+                            {
+                                collectiveFunctions.CombatOnResetThumbstick();
+                                thumbstickWasMoving = false;
+                            }
+                        }
+                        
+                        if (Helicopter.collectiveModded)
+                        {
+                            collectiveFunctions.CombatOnTriggerUp();
+                            collectiveFunctions.combatCollective.triggerIsDown = false;
+                        }
+                    }
+                    else
+                    {
+                        collectiveFunctions.OnFlightCollectiveThumbstick(vector);
+                    }
+                    return;
+                }
 
                 if (vector != Vector3.zero)
                 {
@@ -300,12 +408,46 @@ namespace Triquetra.Input
                         ThumbstickButton(binding, joystickValue);
                         break;
                 }
+                UpdateThumbstick(binding);
             }
             #endregion
 
             private static bool cmPressed = false;
             public static void Countermeasures(Binding binding, int joystickValue)
             {
+                if (collectiveFunctions)
+                {
+                    if (binding.CombatCollective)
+                    {
+                        if (Helicopter.collectiveModded)
+                        {
+                            collectiveFunctions.CombatOnTriggerDown();
+                            collectiveFunctions.combatCollective.triggerIsDown = true;
+                        }
+                        
+                        if (cmPressed == false && binding.GetButtonPressed(joystickValue))
+                        {
+                            cmPressed = true;
+                            collectiveFunctions.CombatMenuButtonDown();
+                        }
+                        if (cmPressed == true && !binding.GetButtonPressed(joystickValue))
+                        {
+                            cmPressed = false;
+                            collectiveFunctions.CombatMenuButtonUp();
+                        }
+                        
+                        if (Helicopter.collectiveModded)
+                        {
+                            collectiveFunctions.CombatOnTriggerUp();
+                            collectiveFunctions.combatCollective.triggerIsDown = false;
+                        }
+                    }
+                    else
+                    {
+                        collectiveFunctions.FlightMenuButtonDown();
+                    }
+                    return;
+                }
                 if (throttle == null)
                     return;
 
@@ -325,7 +467,31 @@ namespace Triquetra.Input
             {
                 var vehicleObject = VTAPI.GetPlayersVehicleGameObject();
                 if (vehicleObject)
-                    return vehicleObject.GetComponentInChildren<VRThrottle>(true);
+                {
+                    var throttles = vehicleObject.GetComponentsInChildren<VRThrottle>(true);
+                    var nonPower = throttles.FirstOrDefault(t => t.interactable && !t.interactable.interactableName.Contains("Power"));
+                    
+                    if (nonPower != null)
+                        return nonPower;
+                    return throttles[0];
+                }
+                return null;
+            }
+
+            internal static AH94CollectiveFunctions FindCollective()
+            {
+                var vehicleObject = VTAPI.GetPlayersVehicleGameObject();
+                if (vehicleObject)
+                {
+                    var throttles = vehicleObject.GetComponentsInChildren<VRThrottle>(true);
+                    var nonPower = throttles.FirstOrDefault(t => t.interactable && t.interactable.interactableName.ToLower().Contains("flight"));
+                    if (nonPower != null)
+                    {
+                        collectiveFunctions = nonPower.GetComponentInParent<AH94CollectiveFunctions>();
+                        if (nonPower != null)
+                            return collectiveFunctions;
+                    }
+                }
                 return null;
             }
         }
@@ -577,6 +743,8 @@ namespace Triquetra.Input
                     Joystick.joystick = Joystick.FindJoystick();
                 if (Throttle.throttle == null)
                     Throttle.throttle = Throttle.FindThrottle();
+                if (Throttle.collectiveFunctions == null)
+                    Throttle.collectiveFunctions = Throttle.FindCollective();
             }
         }
     }

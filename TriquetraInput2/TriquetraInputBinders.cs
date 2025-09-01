@@ -280,6 +280,18 @@ namespace Triquetra.Input
                         // Thumbstick Direction
                         if (binding.OutputAction == ControllerAction.ThrottleThumbStick || binding.OutputAction == ControllerAction.JoystickThumbStick || binding.OutputAction == ControllerAction.FlatscreenMoveCamera)
                         {
+                            if (binding.OutputAction == ControllerAction.ThrottleThumbStick)
+                            {
+                                GUILayout.BeginHorizontal();
+                                {
+                                    GUILayout.Label("(Helo Only) Use Combat Collective: ");
+                                    if (GUILayout.Button(binding.CombatCollective ? "True" : "False"))
+                                    {
+                                        binding.CombatCollective = !binding.CombatCollective;
+                                    }
+                                }
+                                GUILayout.EndHorizontal();
+                            }
                             // Thumbstick Direction [Select] / Thumbstick Direction [Cancel]
                             GUILayout.BeginHorizontal();
                             {
@@ -302,6 +314,32 @@ namespace Triquetra.Input
                                     }
                                 }
                             }
+                        }
+
+                        if (binding.OutputAction == ControllerAction.Countermeasures)
+                        {
+                            GUILayout.BeginHorizontal();
+                            {
+                                GUILayout.Label("(Helo Only) Use Combat Collective: ");
+                                if (GUILayout.Button(binding.CombatCollective ? "True" : "False"))
+                                {
+                                    binding.CombatCollective = !binding.CombatCollective;
+                                }
+                            }
+                            GUILayout.EndHorizontal();
+                        }
+
+                        if (binding.OutputAction == ControllerAction.Brakes)
+                        {
+                            GUILayout.BeginHorizontal();
+                            {
+                                GUILayout.Label("(Helo Only) Use Combat Collective: ");
+                                if (GUILayout.Button(binding.CombatCollective ? "True" : "False"))
+                                {
+                                    binding.CombatCollective = !binding.CombatCollective;
+                                }
+                            }
+                            GUILayout.EndHorizontal();
                         }
 
                         if (binding.OutputAction == ControllerAction.VRInteract)
@@ -390,8 +428,8 @@ namespace Triquetra.Input
 
                         if (binding.OutputAction == ControllerAction.FlatscreenFoV)
                         {
-                                GUILayout.Label("Target FoV: " + binding.TargetFoV);
-                                binding.TargetFoV = GUILayout.HorizontalSlider(binding.TargetFoV, 30f, 120f);
+                            GUILayout.Label("Target FoV: " + binding.TargetFoV);
+                            binding.TargetFoV = GUILayout.HorizontalSlider(binding.TargetFoV, 30f, 120f);
                         }
 
                         if (binding.OutputActionSelectOpen)
@@ -610,6 +648,17 @@ namespace Triquetra.Input
                         // Thumbstick Direction
                         if (binding.OutputAction == ControllerAction.ThrottleThumbStick || binding.OutputAction == ControllerAction.JoystickThumbStick || binding.OutputAction == ControllerAction.FlatscreenMoveCamera)
                         {
+                            if (binding.OutputAction == ControllerAction.ThrottleThumbStick)
+                            {
+                                GUILayout.BeginHorizontal();
+                                {
+                                    GUILayout.Label("(Helo Only) Use Combat Collective: ");
+                                    if (GUILayout.Button(binding.CombatCollective ? "Combat" : "Flight"))
+                                    {
+                                        binding.CombatCollective = !binding.CombatCollective;
+                                    }
+                                }
+                            }
                             // Thumbstick Direction [Select] / Thumbstick Direction [Cancel]
                             GUILayout.BeginHorizontal();
                             {
@@ -810,7 +859,7 @@ namespace Triquetra.Input
                     ControllerActions.Joystick.UpdateStick();
                 }
                 ControllerActions.Joystick.UpdateThumbstick();
-                ControllerActions.Throttle.UpdateThumbstick();
+                //ControllerActions.Throttle.UpdateThumbstick();
             }
         }
 
@@ -831,7 +880,7 @@ namespace Triquetra.Input
 
             _mouseXY = finalStick;
 
-            ControllerActions.Joystick.joystick.OnSetStick.Invoke(_mouseXY);
+            ControllerActions.Joystick.joystick?.OnSetStick?.Invoke(_mouseXY);
         }
 
         int frameCount = 0;

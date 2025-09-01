@@ -1,14 +1,21 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 using ModLoader.Framework;
 using ModLoader.Framework.Attributes;
+using SharpDX.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Valve.Newtonsoft.Json;
 using Debug = UnityEngine.Debug;
+using Encoding = System.Text.Encoding;
+using Formatting = Valve.Newtonsoft.Json.Formatting;
 
 namespace Triquetra.Input
 {
@@ -17,6 +24,7 @@ namespace Triquetra.Input
     {
         private GameObject imguiObject;
         private static string bindingsPath;
+        private static string jsonBindingsPath;
 
         public static bool asyncLoadingBindings;
 
@@ -37,6 +45,7 @@ namespace Triquetra.Input
             GameObject.DontDestroyOnLoad(imguiObject);
 
             bindingsPath = PilotSaveManager.saveDataPath + "/triquetrainput.xml";
+            jsonBindingsPath = PilotSaveManager.saveDataPath + "/triquetrainput.json";
             //LoadBindings();
             StartCoroutine(LoadBindingsCoroutine());
         }
@@ -55,6 +64,11 @@ namespace Triquetra.Input
 
         public static void SaveBindings()
         {
+            /*if (Binding.Bindings != null)
+            {
+                var json = JsonConvert.SerializeObject(Binding.Bindings, Formatting.Indented);
+                File.WriteAllText(jsonBindingsPath, json);
+            }*/
             XmlSerializer serializer = new XmlSerializer(Binding.Bindings.GetType());
             using (StringWriter writer = new StringWriter())
             {
@@ -70,17 +84,22 @@ namespace Triquetra.Input
         public static void LoadBindings()
         {
             Stopwatch sw = Stopwatch.StartNew();
-            XmlSerializer serializer = new XmlSerializer(Binding.Bindings.GetType());
+            XmlSerializer serializer = new XmlSerializer(typeof(List<Binding>));
             if (File.Exists(bindingsPath))
             {
                 using (Stream reader = new FileStream(bindingsPath, FileMode.Open))
                 {
-                    lock (Binding.Bindings)
-                    {
-                        Binding.Bindings = (List<Binding>)serializer.Deserialize(reader);
-                    }
+                    Binding.Bindings = (List<Binding>)serializer.Deserialize(reader);
                 }
             }
+            
+            /*if (File.Exists(jsonBindingsPath))
+            {
+                var text = File.ReadAllText(jsonBindingsPath);
+                if (String.IsNullOrEmpty(text))
+                    return;
+                Binding.Bindings = JsonConvert.DeserializeObject<List<Binding>>(text);
+            }*/
         }
 
         private static IEnumerator LoadBindingsCoroutine()
@@ -93,10 +112,17 @@ namespace Triquetra.Input
 
         private static async Task AsyncLoadBindings()
         {
+            /*if (File.Exists(jsonBindingsPath))
+            {
+                var text = File.ReadAllText(jsonBindingsPath);
+                if (String.IsNullOrEmpty(text))
+                    return;
+                Binding.Bindings = await Task.Run(() => JsonConvert.DeserializeObject<List<Binding>>(text));
+            }*/
             XmlSerializer serializer = new XmlSerializer(typeof(List<Binding>));
             if (File.Exists(bindingsPath))
             {
-                using (Stream reader = new BufferedStream(new FileStream(bindingsPath, FileMode.Open)))
+                using (Stream reader = new FileStream(bindingsPath, FileMode.Open))
                 {
                     var bindings = await Task.Run(() => (List<Binding>)serializer.Deserialize(reader));
                     Binding.Bindings = bindings;

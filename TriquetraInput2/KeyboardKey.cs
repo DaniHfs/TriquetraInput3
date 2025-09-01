@@ -5,14 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using UnityEngine;
+using Valve.Newtonsoft.Json;
+using Valve.Newtonsoft.Json.Converters;
 
 namespace Triquetra.Input
 {
     [Serializable]
     public class KeyboardKey
     {
-        [XmlAttribute] public KeyCode PrimaryKey = KeyCode.None;
-        [XmlAttribute] public KeyCode SecondaryKey = KeyCode.None;
+        
+        public KeyCode PrimaryKey = KeyCode.None;
+        
+        public KeyCode SecondaryKey = KeyCode.None;
 
         [XmlIgnore] public bool PrimaryKeyDown = false;
         [XmlIgnore] public bool SecondaryKeyDown = false;
@@ -20,10 +24,10 @@ namespace Triquetra.Input
         [XmlIgnore] public float PrimaryPressTime;
         [XmlIgnore] public float SecondaryPressTime;
 
-        [XmlAttribute] public bool IsAxis = false;
-        [XmlAttribute] public bool IsRepeatButton = false;
+        public bool IsAxis = false;
+        public bool IsRepeatButton = false;
 
-        [XmlAttribute] public float Smoothing = 0.5f;
+        public float Smoothing = 0.5f;
 
         [XmlIgnore] public int t = 32000;
 

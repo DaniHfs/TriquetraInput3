@@ -6,6 +6,8 @@ using System.Xml.Serialization;
 using SharpDX.DirectInput;
 using Triquetra.Input.CustomHandController;
 using UnityEngine;
+using Valve.Newtonsoft.Json;
+using Valve.Newtonsoft.Json.Converters;
 using VTOLAPI;
 using DeviceType = SharpDX.DirectInput.DeviceType;
 using Object = UnityEngine.Object;
@@ -41,28 +43,42 @@ namespace Triquetra.Input
 
         [XmlIgnore] public bool IsKeyboard { get; internal set; } = false;
         [XmlIgnore] public TriquetraJoystick Controller;
+        
+        
         public JoystickOffset Offset;
+        
         [XmlIgnore] public int RawOffset => (int)Offset;
         public bool Invert;
+        
         public AxisCentering AxisCentering = AxisCentering.Normal;
+        
         public TwoAxis SelectedTwoAxis = TwoAxis.Positive;
+        
         public POVFacing POVDirection = POVFacing.Up;
+        
         public ControllerAction OutputAction = ControllerAction.None;
+        
+        public bool CombatCollective;
+        
         
         public VRInteractAction InputAction = VRInteractAction.Interact;
         public float Speed = 0.1f;
+        
         
         public ThumbstickDirection ThumbstickDirection = ThumbstickDirection.None;
         public string VRInteractName = "";
         public float TargetFoV = 0;
         public KeyboardKey KeyboardKey;
+        
         [XmlIgnore] public DeviceInstance JoystickDevice;
 
+        [XmlIgnore]
         private static VTModVariables _fs2ModVariables;
         
         [XmlIgnore]
         private Vector3 _lastPosition = Vector3.zero;
 
+        [XmlIgnore]
         public static VTModVariables FS2ModVariables
         {
             get
@@ -323,6 +339,10 @@ namespace Triquetra.Input
                         else
                             Interactions.AntiInteract(interactable);
                     }
+                }
+                else if (OutputAction == ControllerAction.HeloModThrottle)
+                {
+                    ControllerActions.Helicopter.collectiveModded = GetButtonPressed(joystickValue);
                 }
             }
         }
