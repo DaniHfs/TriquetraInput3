@@ -847,7 +847,7 @@ namespace Triquetra.Input
                 }
                 else
                 {
-                    if (Binding.FS2ModVariables.TryGetValue("CursorHideTimer", out var timer))
+                    if (Binding.FS2ModVariables != null && Binding.FS2ModVariables.TryGetValue("CursorHideTimer", out var timer))
                     {
                         Cursor.visible = (float)timer > 0;
                     }

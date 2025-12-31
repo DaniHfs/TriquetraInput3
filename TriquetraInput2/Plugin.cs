@@ -105,20 +105,16 @@ namespace Triquetra.Input
         private static IEnumerator LoadBindingsCoroutine()
         {
             asyncLoadingBindings = true;
-            var task = AsyncLoadBindings();
-            yield return new WaitUntil(() => task.IsCompleted);
+            var task = Task.Run(AsyncLoadBindings);
+            while (!task.IsCompleted)
+            {
+                yield return null;
+            }
             asyncLoadingBindings = false;
         }
 
-        private static async Task AsyncLoadBindings()
+        private static async Task AsyncLoadBindings() // I have no clue if this is even any faster than normal
         {
-            /*if (File.Exists(jsonBindingsPath))
-            {
-                var text = File.ReadAllText(jsonBindingsPath);
-                if (String.IsNullOrEmpty(text))
-                    return;
-                Binding.Bindings = await Task.Run(() => JsonConvert.DeserializeObject<List<Binding>>(text));
-            }*/
             XmlSerializer serializer = new XmlSerializer(typeof(List<Binding>));
             if (File.Exists(bindingsPath))
             {
