@@ -5,10 +5,13 @@
 
 # VTOL VR mod dependencies
 
-Dependencies/*
+!Dependencies/*
 !Dependencies/instructions.txt
 Builds/*
 !Builds/info.json
+
+# Finished builds
+Finished/*
 
 # User-specific files
 *.rsuser
