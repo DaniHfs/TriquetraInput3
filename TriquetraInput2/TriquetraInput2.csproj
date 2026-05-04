@@ -8,48 +8,48 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\@Mod Loader\Managed\0Harmony.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp" Publicize="True">
-      <HintPath>C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\Dependencies\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="JsonSubTypes">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\@Mod Loader\Managed\JsonSubTypes.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\JsonSubTypes.dll</HintPath>
     </Reference>
     <Reference Include="Mod Loader">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\@Mod Loader\Managed\Mod Loader.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\Mod Loader.dll</HintPath>
     </Reference>
     <Reference Include="ModLoader.Framework">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\@Mod Loader\Managed\ModLoader.Framework.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\ModLoader.Framework.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\DependenciesDependencies\0SharpDX.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\0SharpDX.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="SharpDX.DirectInput">
-      <HintPath>C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\DependenciesDependencies\SharpDX.DirectInput.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\SharpDX.DirectInput.dll</HintPath>
     </Reference>
     <Reference Include="TriquetraInteractions">
-      <HintPath>C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\Dependencies\TriquetraInteractions.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\TriquetraInteractions.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\VTOLVR_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="Valve.Newtonsoft.Json">
-      <HintPath>D:\SteamLibrary\steamapps\common\VTOL VR\VTOLVR_Data\Managed\Valve.Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="VTOLAPI">
-      <HintPath>D:\SteamLibrary\steamapps\workshop\content\3018410\3265689427\VTOLAPI.dll</HintPath>
+      <HintPath>$(ProjectDir)Dependencies\VTOLAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -66,15 +66,15 @@
   </ItemGroup>
 <Target Name="PostBuild" AfterTargets="PostBuildEvent">
   <!-- Create the 'finished' folder if it doesn't exist -->
-  <MakeDir Directories="C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\finished" />
+  <MakeDir Directories="$(ProjectDir)finished" />
   
   <!-- Copy the freshly built Mod DLL -->
-  <Copy SourceFiles="$(TargetPath)" DestinationFolder="C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\finished" />
+  <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProjectDir)finished" />
   
   <!-- Copy the 0SharpDX dependency so the mod can actually run -->
-  <Copy SourceFiles="C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\Dependencies\0SharpDX.dll" DestinationFolder="C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\finished" />
+  <Copy SourceFiles="$(ProjectDir)Dependencies\0SharpDX.dll" DestinationFolder="$(ProjectDir)finished" />
 
   <!-- Helpful success message in the console -->
-  <Message Importance="High" Text="Build Complete! Files moved to: C:\Users\chief\Desktop\VTOL VR Modding\TriquetraInput3-master\finished" />
+  <Message Importance="High" Text="Build Complete! Files moved to: $(ProjectDir)finished" />
 </Target>
 </Project>

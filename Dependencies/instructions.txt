@@ -1,4 +1,0 @@
-Dependencies Needed
-	TriquetraInteractions.dll (https://github.com/frdhog/TriquetraInteractions)
-	SharpDX.dll (renamed to 0SharpDX.dll)
-	SharpDX.DirectInput.dll
