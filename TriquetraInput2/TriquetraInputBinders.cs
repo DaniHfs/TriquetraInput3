@@ -101,18 +101,6 @@ namespace Triquetra.Input
             }
             GUILayout.EndVertical();
 
-            // GUILayout.Label(ControllerActions.Joystick.joystick == null ? "No joystick found" : "Joystick found");
-            // GUILayout.Label(ControllerActions.Throttle.throttle == null ? "No throttle found" : "Throttle found");
-
-            /*if (GUILayout.Button("Print all joysticks to console"))
-            {
-                IEnumerable<DeviceInstance> devices = Binding.directInput.GetDevices();
-                foreach (var device in devices)
-                {
-                    Logger.WriteLine($"{device.ProductName} ({device.InstanceGuid}) - {device.Type}");
-                }
-            }*/
-
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Label("Name Filter: ");

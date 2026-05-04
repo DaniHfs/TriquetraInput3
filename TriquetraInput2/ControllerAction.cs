@@ -52,8 +52,6 @@ namespace Triquetra.Input
             {
                 if (radioManager == null)
                     radioManager = FindRadioManager();
-                if (radioManager == null)
-                    return;
 
                 if (binding.GetButtonPressed(joystickValue))
                 {
@@ -80,26 +78,18 @@ namespace Triquetra.Input
             {
                 if (helmetController == null)
                     helmetController = FindHelmetController();
-                if (helmetController == null)
-                    return;
 
                 if (binding.GetButtonPressed(joystickValue))
-                {
                     helmetController.ToggleVisor();
-                }
             }
 
             public static void ToggleNVG(Binding binding, int joystickValue, int delta = 1)
             {
                 if (helmetController == null)
                     helmetController = FindHelmetController();
-                if (helmetController == null)
-                    return;
 
                 if (binding.GetButtonPressed(joystickValue))
-                {
                     helmetController.ToggleNVG();
-                }
             }
 
             private static HelmetController FindHelmetController()
@@ -115,13 +105,9 @@ namespace Triquetra.Input
             {
                 if (flaps == null)
                     flaps = FindFlaps();
-                if (flaps == null)
-                    return;
 
                 if (binding.GetButtonPressed(joystickValue))
-                {
                     Interactions.MoveLever(flaps, delta, true);
-                }
             }
 
             public static void DecreaseFlaps(Binding binding, int joystickValue)
@@ -133,13 +119,9 @@ namespace Triquetra.Input
             {
                 if (flaps == null)
                     flaps = FindFlaps();
-                if (flaps == null)
-                    return;
 
                 if (binding.GetButtonPressed(joystickValue))
-                {
                     Interactions.MoveLever(flaps, 1, false);
-                }
             }
 
             internal static VRLever FindFlaps()
@@ -159,8 +141,6 @@ namespace Triquetra.Input
             {
                 if (power == null)
                     power = FindThrottle();
-                if (power == null)
-                    return;
 
                 Interactions.SetThrottle(power, binding.GetAxisAsFloat(joystickValue));
             }

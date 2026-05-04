@@ -54,29 +54,49 @@ namespace Triquetra.Input
         public new void Poll()
         {
             if (!hasAcquired)
-            {
                 Acquire();
-            }
-            base.Poll();
 
-            JoystickUpdate[] updates = base.GetBufferedData();
-            foreach (JoystickUpdate update in updates)
+            try 
             {
-                foreach(Binding binding in Binding.Bindings)
-                {
-                    if (binding.IsKeyboard) continue;
+                base.Poll();
+                JoystickUpdate[] updates = base.GetBufferedData();
+                
+                // If no movement, exit early and save CPU
+                if (updates == null || updates.Length == 0) return;
 
-                    if (binding.Controller.Properties.JoystickId == this.Properties.JoystickId)
+                foreach (JoystickUpdate update in updates)
+                {
+                    // Update the internal states first
+                    State.Update(update);
+                    RawState[update.RawOffset] = update;
+
+                    // Optimized Lookup: Only loop through bindings that match this specific ID
+                    // Perhaps use a Dictionary to be even faster?
+                    foreach (Binding binding in Binding.Bindings)
                     {
-                        if (binding.Offset == update.Offset)
+                        // Skip irrelevant bindings immediately
+                        if (binding.IsKeyboard || binding.Offset != update.Offset) continue;
+                        
+                        if (binding.Controller.Properties.JoystickId == this.Properties.JoystickId)
                         {
-                            binding.RunAction(update.Value);
+                            // DEADZONE/THRESHOLD CHECK
+                            // Only run heavy plane logic if the value changed significantly
+                            // (Prevents "Sensor Jitter" from tanking FPS)
+                            if (Math.Abs(update.Value - binding.LastValue) > 10) 
+                            {
+                                binding.RunAction(update.Value);
+                                binding.LastValue = update.Value; // Added LastValue to binding class
+                            }
+
+                            binding.Controller.Updated?.Invoke(this, update);
                         }
-                        binding.Controller.Updated?.Invoke(this, update);
                     }
                 }
-                State.Update(update);
-                RawState[update.RawOffset] = update;
+            }
+            catch (Exception e)
+            {
+                // DirectInput can throw errors if a device is unplugged mid-game
+                UnityEngine.Debug.LogError("TriquetraInput: Error during Poll: " + e.Message);
             }
         }
     }

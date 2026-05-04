@@ -35,6 +35,7 @@ namespace Triquetra.Input
         public const int Deadzone = 8192;
         public const int POVMin = 0;
         public const int POVMax = 36000;
+        public int LastValue { get; set; } = -1; // Added this
 
         public static List<Binding> Bindings = new List<Binding>();
         public static DirectInput directInput = new DirectInput();
@@ -199,166 +200,151 @@ namespace Triquetra.Input
 
         public void RunAction(int joystickValue)
         {
-            if (OutputAction == ControllerAction.FlatscreenCenterInteract)
+            switch (OutputAction)
             {
-                if (FS2ModVariables != null)
-                {
-                    
-                    FS2ModVariables.TrySetValue("InteractCenter", GetButtonPressed(joystickValue));
-                }
-                else
-                {
-                    Debug.Log($"FS2 Mod Variables null!");
-                }
-            }
-            else if (OutputAction == ControllerAction.FlatscreenFoV)
-            {
-                if (GetButtonPressed(joystickValue))
-                {
+                case ControllerAction.FlatscreenCenterInteract:
                     if (FS2ModVariables != null)
-                    {
-                        FS2ModVariables.TrySetValue("SetZoom", TargetFoV);
-                    }
+                        FS2ModVariables.TrySetValue("InteractCenter", GetButtonPressed(joystickValue));
                     else
-                    {
                         Debug.Log($"FS2 Mod Variables null!");
-                    }
-                }
-            }
-            else if (OutputAction == ControllerAction.FlatscreenMoveCamera)
-            {
-                ControllerActions.FS2Camera.Thumbstick(this, joystickValue);
-            }
-            else if (OutputAction == ControllerAction.NewVRInteract) // imitating controller for custom interactables maybe
-            {
-                if (Plugin.IsFlyingScene())
-                {
-                    var vehicleObject = VTAPI.GetPlayersVehicleGameObject();
-                    if (vehicleObject != null)
+                    break;
+                
+                case ControllerAction.FlatscreenFoV:
+                    if (GetButtonPressed(joystickValue))
                     {
-                        var interactables = vehicleObject.GetComponentsInChildren<VRInteractable>();
-                        var targetInteractable =
-                            interactables.FirstOrDefault(x => x.interactableName == VRInteractName);
-                        if (targetInteractable)
+                        if (FS2ModVariables != null)
+                            FS2ModVariables.TrySetValue("SetZoom", TargetFoV);
+                        else
+                            Debug.Log($"FS2 Mod Variables null!");
+                    }
+                    break;
+                
+                case ControllerAction.FlatscreenMoveCamera:
+                    ControllerActions.FS2Camera.Thumbstick(this, joystickValue);
+                    break;
+
+                case ControllerAction.NewVRInteract: // imitating controller for custom interactables maybe
+                    if (Plugin.IsFlyingScene())
+                    {
+                        var vehicleObject = VTAPI.GetPlayersVehicleGameObject();
+
+                        if (vehicleObject != null)
                         {
-                            RunVRInteractAction(targetInteractable, joystickValue);
+                            var interactables = vehicleObject.GetComponentsInChildren<VRInteractable>();
+                            var targetInteractable =
+                                interactables.FirstOrDefault(x => x.interactableName == VRInteractName);
+
+                            if (targetInteractable)
+                                RunVRInteractAction(targetInteractable, joystickValue);
                         }
                     }
-                }
+                    break;
             }
+
             if (Plugin.IsFlyingScene()) // Only try and get throttle in a flying scene
             {
-                if (OutputAction == ControllerAction.Throttle)
+                switch (OutputAction)
                 {
-                    if (IsKeyboard)
-                        ControllerActions.Throttle.MoveThrottle(this, joystickValue, 0.025f);
-                    else
-                        ControllerActions.Throttle.SetThrottle(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.HeloPower)
-                {
-                    if (IsKeyboard)
-                        ControllerActions.Throttle.MoveThrottle(this, joystickValue, 0.025f);
-                    else
-                        ControllerActions.Helicopter.SetPower(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.Pitch)
-                {
-                    ControllerActions.Joystick.SetPitch(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.Yaw)
-                {
-                    ControllerActions.Joystick.SetYaw(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.Roll)
-                {
-                    ControllerActions.Joystick.SetRoll(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.JoystickTrigger)
-                {
-                    ControllerActions.Joystick.Trigger(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.SwitchWeapon)
-                {
-                    ControllerActions.Joystick.SwitchWeapon(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.JoystickThumbStick)
-                {
-                    ControllerActions.Joystick.Thumbstick(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.ThrottleThumbStick)
-                {
-                    ControllerActions.Throttle.Thumbstick(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.Countermeasures)
-                {
-                    ControllerActions.Throttle.Countermeasures(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.Brakes)
-                {
-                    ControllerActions.Throttle.TriggerBrakes(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.FlapsIncrease)
-                {
-                    ControllerActions.Flaps.IncreaseFlaps(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.FlapsDecrease)
-                {
-                    ControllerActions.Flaps.DecreaseFlaps(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.FlapsCycle)
-                {
-                    ControllerActions.Flaps.CycleFlaps(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.Visor)
-                {
-                    ControllerActions.Helmet.ToggleVisor(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.NightVisionGoggles)
-                {
-                    ControllerActions.Helmet.ToggleNVG(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.PTT)
-                {
-                    ControllerActions.Radio.PTT(this, joystickValue);
-                }
-                else if (OutputAction == ControllerAction.ToggleMouseFly)
-                {
-                    if (GetButtonPressed(joystickValue))
-                        TriquetraInputBinders.useMouseFly = !TriquetraInputBinders.useMouseFly;
-                }
-                else if (OutputAction == ControllerAction.VRInteract)
-                {
-                    VRInteractable interactable = GameObject.FindObjectsOfType<VRInteractable>(false)
+                    case ControllerAction.Throttle:
+                        if (IsKeyboard)
+                            ControllerActions.Throttle.MoveThrottle(this, joystickValue, 0.025f);
+                        else
+                            ControllerActions.Throttle.SetThrottle(this, joystickValue);
+                        break;
+                    
+                    case ControllerAction.HeloPower:
+                        if (IsKeyboard)
+                            ControllerActions.Throttle.MoveThrottle(this, joystickValue, 0.025f);
+                        else
+                            ControllerActions.Helicopter.SetPower(this, joystickValue);
+                        break;
+                    
+                    case ControllerAction.Pitch:
+                        ControllerActions.Joystick.SetPitch(this, joystickValue);
+                        break;
+
+                    case ControllerAction.Yaw:
+                        ControllerActions.Joystick.SetYaw(this, joystickValue);
+                        break;
+
+                    case ControllerAction.Roll:
+                        ControllerActions.Joystick.SetRoll(this, joystickValue);
+                        break;
+                    
+                    case ControllerAction.JoystickTrigger:
+                        ControllerActions.Joystick.Trigger(this, joystickValue);
+                        break;
+
+                    case ControllerAction.SwitchWeapon:
+                        ControllerActions.Joystick.SwitchWeapon(this, joystickValue);
+                        break;
+
+                    case ControllerAction.JoystickThumbStick:
+                        ControllerActions.Joystick.Thumbstick(this, joystickValue);
+                        break;
+
+                    case ControllerAction.ThrottleThumbStick:
+                        ControllerActions.Throttle.Thumbstick(this, joystickValue);
+                        break;
+
+                    case ControllerAction.Countermeasures:
+                        ControllerActions.Throttle.Countermeasures(this, joystickValue);
+                        break;
+                    
+                    case ControllerAction.Brakes:
+                        ControllerActions.Throttle.TriggerBrakes(this, joystickValue);
+                        break;
+
+                    case ControllerAction.FlapsIncrease:
+                        ControllerActions.Flaps.IncreaseFlaps(this, joystickValue);
+                        break;
+
+                    case ControllerAction.FlapsDecrease:
+                        ControllerActions.Flaps.DecreaseFlaps(this, joystickValue);
+                        break;
+
+                    case ControllerAction.FlapsCycle:
+                        ControllerActions.Flaps.CycleFlaps(this, joystickValue);
+                        break;
+                    
+                    case ControllerAction.Visor:
+                        ControllerActions.Helmet.ToggleVisor(this, joystickValue);
+                        break;
+                    
+                    case ControllerAction.NightVisionGoggles:
+                        ControllerActions.Helmet.ToggleNVG(this, joystickValue);
+                        break;
+
+                    case ControllerAction.PTT:
+                        ControllerActions.Radio.PTT(this, joystickValue);
+                        break;
+                    
+                    case ControllerAction.ToggleMouseFly:
+                        if (GetButtonPressed(joystickValue))
+                            TriquetraInputBinders.useMouseFly = !TriquetraInputBinders.useMouseFly;
+                        break;
+
+                    case ControllerAction.VRInteract:
+                        VRInteractable interactable = GameObject.FindObjectsOfType<VRInteractable>(false)
                         .Where(i => i.interactableName.ToLower() == VRInteractName.ToLower())
                         .FirstOrDefault();
-                    if (interactable != null)
-                    {
-                        if (GetButtonPressed(joystickValue))
-                            Interactions.Interact(interactable);
-                        else
-                            Interactions.AntiInteract(interactable);
-                    }
+                            
+                        if (interactable != null)
+                        {
+                            if (GetButtonPressed(joystickValue))
+                                Interactions.Interact(interactable);
+                            else
+                                Interactions.AntiInteract(interactable);
+                        }
+                        break;
+                    
+                    case ControllerAction.HeloModThrottle:
+                        ControllerActions.Helicopter.collectiveModded = GetButtonPressed(joystickValue);
+                        break;
                 }
-                else if (OutputAction == ControllerAction.HeloModThrottle)
-                {
-                    ControllerActions.Helicopter.collectiveModded = GetButtonPressed(joystickValue);
-                }
+
             }
         }
-
-        /*private IEnumerator DestroyControllerRoutine(GameObject controllerGameObjectObj)
-        {
-            if (controllerGameObjectObj == null)
-            {
-                Debug.LogError($"[TriquetraInput2] No controller to destroy?????");
-                yield break;
-            }
-            
-            yield return new WaitForEndOfFrame();
-            Debug.Log($"Destroying controller {controllerGameObjectObj}");
-            Object.Destroy(controllerGameObjectObj);
-        }*/
 
         public void RunVRInteractAction(VRInteractable interactable, int joystickValue)
         {
@@ -388,7 +374,6 @@ namespace Triquetra.Input
                     handController = null;
                     _lastPosition = Vector3.zero;
 
-                    
                     return;
                 }
             }
@@ -400,10 +385,12 @@ namespace Triquetra.Input
                 var parentA = new GameObject("TriquetraHandController_ParentA");
                 var parentB = new GameObject("TriquetraHandController_ParentB");
                 parentB.transform.parent = parentA.transform;
+
                 var handControllerObject = new GameObject($"TriquetraHandController_{VRInteractName}");
                 handControllerObject.transform.parent = parentB.transform;
                 
                 handController = handControllerObject.AddComponent<TriquetraInput_VRHandController>();
+
                 var gloveAnimation = handControllerObject.AddComponent<TriquetraInput_GloveAnimation>();
                 handController.gloveAnimation = gloveAnimation;
                 
@@ -411,8 +398,10 @@ namespace Triquetra.Input
                 
                 if (interactable.activeController)
                     interactable.StopInteraction();
+
                 handController.activeInteractable = null;
                 handController.hoverInteractable = interactable;
+
                 interactable.Click(handController);
             }
             
@@ -441,17 +430,18 @@ namespace Triquetra.Input
                     _lastPosition += moveDir * (Speed * Time.deltaTime);
                     handController.transform.position = interactable.transform.TransformPoint(_lastPosition);
                     break;
+
                 case VRInteractAction.PrimaryButton:
                     handController.ThumbButtonPressed();
                     break;
+
                 case VRInteractAction.SecondaryButton:
                     handController.SecondaryThumbButtonPressed();
                     break;
+
                 case VRInteractAction.ThumbstickAxis:
                     Vector2 axis = Vector3.zero;
                     
-                    
-
                     switch (ThumbstickDirection)
                     {
                         case ThumbstickDirection.Up:
@@ -474,16 +464,23 @@ namespace Triquetra.Input
                         handController.ThumbstickButtonPressed();
                         bool xNegative = finalAxis.x < 0;
                         bool yNegative = finalAxis.y < 0;
-                        switch (ThumbstickDirection)
+
+                        switch (ThumbstickDirection) // No idea why Right and Up are empty, not touching them - Midnight
                         {
                             case ThumbstickDirection.Right:
+                                break;
+
                             case ThumbstickDirection.Left:
                                 finalAxis.x = Mathf.Clamp(finalAxis.x, xNegative ? -1f : 0.351f, xNegative ? -0.351f : 1);
                                 break;
+
                             case ThumbstickDirection.Up:
+                                break;
+
                             case ThumbstickDirection.Down:
                                 finalAxis.y = Mathf.Clamp(finalAxis.y, yNegative ? -1f : 0.351f, yNegative ? -0.351f : 1);
                                 break;
+
                             case ThumbstickDirection.Press:
                                 finalAxis = Vector2.zero;
                                 break;
@@ -496,9 +493,11 @@ namespace Triquetra.Input
                     
                     handController.StickAxis(finalAxis);
                     break;
+
                 case VRInteractAction.ThumbstickButton:
                     handController.ThumbstickButtonPressed();
                     break;
+
                 case VRInteractAction.TriggerAxis:
                     handController.TriggerAxis(GetAxisAsFloat(joystickValue));
                     break;
@@ -513,10 +512,12 @@ namespace Triquetra.Input
                     return 1f - ((float)value / ButtonMax);
                 return (float)value / ButtonMax;
             }
+
             if (IsOffsetPOV)
             {
                 return (float)value / POVMax;
             }
+
             if (AxisCentering == AxisCentering.TwoAxis)
             {
                 if (value > AxisMiddle && SelectedTwoAxis == TwoAxis.Positive)
@@ -531,10 +532,11 @@ namespace Triquetra.Input
                 }
                 else
                     return 0;
-
             }
+
             if (Invert)
                 return 1f - ((float)value / AxisMax);
+
             return (float)value / AxisMax;
         }
 
@@ -544,35 +546,40 @@ namespace Triquetra.Input
             {
                 if (AxisCentering == AxisCentering.Middle)
                     return value < AxisMiddle - Deadzone || value > AxisMiddle + Deadzone;
+
                 else if (AxisCentering == AxisCentering.TwoAxis)
-                {
                     return GetAxisAsFloat(value) >= 0.5f;
-                }
+
                 else // Normal Min-Max
-                {
                     if (Invert) // Max-Min
                         return value < AxisMax - Deadzone;
                     else // Min-Max
                         return value > AxisMin + Deadzone;
-                }
             }
+
             if (IsOffsetButton)
             {
                 if (Invert)
                     return value <= ButtonMax;
+
                 else
                     return value >= ButtonMax;
             }
+            
             if (IsOffsetPOV)
             {
                 if (POVDirection == POVFacing.Up)
                     return value == (int)POVFacing.Up || value == (int)POVFacing.UpRight || value == (int)POVFacing.UpLeft;
+
                 else if (POVDirection == POVFacing.Right)
                     return value == (int)POVFacing.Right || value == (int)POVFacing.DownRight || value == (int)POVFacing.UpRight;
+
                 else if (POVDirection == POVFacing.Down)
                     return value == (int)POVFacing.Down || value == (int)POVFacing.DownLeft || value == (int)POVFacing.DownRight;
+
                 else if (POVDirection == POVFacing.Left)
                     return value == (int)POVFacing.Left || value == (int)POVFacing.UpLeft || value == (int)POVFacing.DownLeft;
+
                 else
                     return false;
             }
@@ -592,13 +599,16 @@ namespace Triquetra.Input
                 if (KeyboardKey.IsRepeatButton)
                 {
                     bool pressed = UnityEngine.Input.GetKeyDown(KeyboardKey.PrimaryKey);
+
                     int translatedValue = pressed ? ButtonMax : ButtonMin;
+
                     RunAction(translatedValue);
                 }
                 else
                 {
                     bool pressed = UnityEngine.Input.GetKeyDown(KeyboardKey.PrimaryKey);
                     bool released = UnityEngine.Input.GetKeyUp(KeyboardKey.PrimaryKey);
+
                     int translatedValue = pressed ? ButtonMax : ButtonMin;
 
                     if (pressed && !KeyboardKey.PrimaryKeyDown)
