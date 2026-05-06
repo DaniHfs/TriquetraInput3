@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO; // Required for error logger
 using System.Collections.Generic;
 using SharpDX.DirectInput;
 
@@ -84,7 +85,16 @@ namespace Triquetra.Input
                             // (Prevents "Sensor Jitter" from tanking FPS)
                             if (Math.Abs(update.Value - binding.LastValue) > 10) 
                             {
-                                binding.RunAction(update.Value);
+                                // Error logger
+                                try
+                                {
+                                    binding.RunAction(update.Value);
+                                }
+                                catch (Exception actionEx)
+                                {
+                                    LogToFile($"Action Error (Offset {update.Offset}): {actionEx.Message}\n{actionEx.StackTrace}");
+                                }
+                                
                                 binding.LastValue = update.Value; // Added LastValue to binding class
                             }
 
@@ -95,9 +105,23 @@ namespace Triquetra.Input
             }
             catch (Exception e)
             {
+                // Hopefully this will catch big stuff (Like the loop crashing entirely)
+                LogToFile($"CRITICAL POLL ERROR: {e.Message}\n{e.StackTrace}");
                 // DirectInput can throw errors if a device is unplugged mid-game
                 UnityEngine.Debug.LogError("TriquetraInput: Error during Poll: " + e.Message);
             }
+        }
+
+        // Helper method to write error log file
+        private void LogToFile(string text)
+        {
+            try
+            {
+                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Triquetra_Debug_Log.txt");
+                string logEntry = $"[{DateTime.Now:dd-MM-yyyy HH:mm:ss.fff}] {text}\n" + new string('-', 30) + "\n";
+                File.AppendAllText(path, logEntry);
+            }
+            catch {/* Ignore logging errors to prevent recursive crashing*/}
         }
     }
 }

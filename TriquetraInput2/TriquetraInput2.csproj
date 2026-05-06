@@ -8,48 +8,48 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>$(ProjectDir)Dependencies\0Harmony.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp" Publicize="True">
-      <HintPath>$(ProjectDir)Dependencies\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="JsonSubTypes">
-      <HintPath>$(ProjectDir)Dependencies\JsonSubTypes.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\JsonSubTypes.dll</HintPath>
     </Reference>
     <Reference Include="Mod Loader">
-      <HintPath>$(ProjectDir)Dependencies\Mod Loader.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\Mod Loader.dll</HintPath>
     </Reference>
     <Reference Include="ModLoader.Framework">
-      <HintPath>$(ProjectDir)Dependencies\ModLoader.Framework.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\ModLoader.Framework.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>$(ProjectDir)Dependencies\0SharpDX.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\0SharpDX.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="SharpDX.DirectInput">
-      <HintPath>$(ProjectDir)Dependencies\SharpDX.DirectInput.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\SharpDX.DirectInput.dll</HintPath>
     </Reference>
     <Reference Include="TriquetraInteractions">
-      <HintPath>$(ProjectDir)Dependencies\TriquetraInteractions.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\TriquetraInteractions.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>$(ProjectDir)Dependencies\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(ProjectDir)Dependencies\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>$(ProjectDir)Dependencies\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(ProjectDir)Dependencies\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="Valve.Newtonsoft.Json">
-      <HintPath>$(ProjectDir)Dependencies\Valve.Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\Valve.Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="VTOLAPI">
-      <HintPath>$(ProjectDir)Dependencies\VTOLAPI.dll</HintPath>
+      <HintPath>$(ProjectDir)..\Dependencies\VTOLAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -72,7 +72,7 @@
   <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProjectDir)finished" />
   
   <!-- Copy the 0SharpDX dependency so the mod can actually run -->
-  <Copy SourceFiles="$(ProjectDir)Dependencies\0SharpDX.dll" DestinationFolder="$(ProjectDir)finished" />
+  <Copy SourceFiles="$(ProjectDir)..\Dependencies\0SharpDX.dll" DestinationFolder="$(ProjectDir)finished" />
 
   <!-- Helpful success message in the console -->
   <Message Importance="High" Text="Build Complete! Files moved to: $(ProjectDir)finished" />
