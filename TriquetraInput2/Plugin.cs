@@ -19,7 +19,7 @@ using Formatting = Valve.Newtonsoft.Json.Formatting;
 
 namespace Triquetra.Input
 {
-    [ItemId("danku-triquetra2")]
+    [ItemId("midnight-triquetra3")]
     public class Plugin : VtolMod
     {
         private GameObject imguiObject;

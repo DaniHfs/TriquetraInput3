@@ -2,6 +2,7 @@
 using System.IO; // Required for error logger
 using System.Collections.Generic;
 using SharpDX.DirectInput;
+using Debug = UnityEngine.Debug;
 
 namespace Triquetra.Input
 {
@@ -119,14 +120,14 @@ namespace Triquetra.Input
             {
                 // Print full error including line number
                 LogToFile($"[CRITICAL POLL ERROR]\nMsg: {e.Message}\nStack Trace: {e.StackTrace}");
-                UnityEngine.Debug.LogError("[Triquetra] Critical Failure in Poll. Check LocalAppData log.");
+                Debug.Log("[Triquetra] Critical Failure in Poll. Check LocalAppData log.");
             }
         }
 
         // Custom logger
         private void LogToFile(string text)
         {
-            UnityEngine.Debug.Log($"[TRIQUETRA] {text}");
+            Debug.Log($"[TRIQUETRA] {text}");
         }
 
     }
