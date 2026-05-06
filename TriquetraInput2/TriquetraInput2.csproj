@@ -69,12 +69,12 @@
   <MakeDir Directories="$(ProjectDir)finished" />
   
   <!-- Copy the freshly built Mod DLL -->
-  <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProjectDir)finished" />
+  <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProjectDir)..\finished" />
   
   <!-- Copy the 0SharpDX dependency so the mod can actually run -->
-  <Copy SourceFiles="$(ProjectDir)..\Dependencies\0SharpDX.dll" DestinationFolder="$(ProjectDir)finished" />
+  <Copy SourceFiles="$(ProjectDir)..\Dependencies\0SharpDX.dll" DestinationFolder="$(ProjectDir)..\finished" />
 
   <!-- Helpful success message in the console -->
-  <Message Importance="High" Text="Build Complete! Files moved to: $(ProjectDir)finished" />
+  <Message Importance="High" Text="Build Complete! Files moved to: $(ProjectDir)..\finished" />
 </Target>
 </Project>

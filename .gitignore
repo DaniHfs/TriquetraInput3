@@ -11,7 +11,7 @@ Builds/*
 !Builds/info.json
 
 # Finished builds
-Finished/*
+finished/*
 
 # User-specific files
 *.rsuser
