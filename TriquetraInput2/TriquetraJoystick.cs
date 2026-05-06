@@ -62,56 +62,63 @@ namespace Triquetra.Input
             {
                 base.Poll();
                 JoystickUpdate[] updates = base.GetBufferedData();
-                
+        
                 // If no movement, exit early and save CPU
                 if (updates == null || updates.Length == 0) return;
 
+                // Grouping updates to prevent FPS drops from dual-throttle input
+                Dictionary<int, int> frameSummary = new Dictionary<int, int>();
                 foreach (JoystickUpdate update in updates)
                 {
                     // Update the internal states first
                     State.Update(update);
                     RawState[update.RawOffset] = update;
+                    frameSummary[(int)update.Offset] = update.Value;
+                }
+
+                // Process unique axis movements only once per frame
+                foreach (var entry in frameSummary)
+                {
+                    int currentOffset = entry.Key;
+                    int currentValue = entry.Value;
 
                     // Optimized Lookup: Only loop through bindings that match this specific ID
-                    // Perhaps use a Dictionary to be even faster?
                     foreach (Binding binding in Binding.Bindings)
                     {
                         // Null check to ensure binding and its controller exist
                         if (binding == null || binding.Controller == null) continue;
 
                         // Skip irrelevant bindings immediately
-                        if (binding.IsKeyboard || binding.Offset != update.Offset) continue;
-                        
+                        if (binding.IsKeyboard || (int)binding.Offset != currentOffset) continue;
+                
                         if (binding.Controller.Properties.JoystickId == this.Properties.JoystickId)
                         {
                             // DEADZONE/THRESHOLD CHECK
                             // Only run heavy plane logic if the value changed significantly
                             // (Prevents "Sensor Jitter" from tanking FPS)
-                            if (Math.Abs(update.Value - binding.LastValue) > 10) 
+                            if (Math.Abs(currentValue - binding.LastValue) > 10) 
                             {
                                 // Error logger for new throttle bug
                                 try
                                 {
-                                    binding.RunAction(update.Value);
-                                    binding.LastValue = update.Value; // Added LastValue to binding class
+                                    binding.RunAction(currentValue);
+                                    binding.LastValue = currentValue; // Added LastValue to binding class
                                 }
                                 catch (Exception actionEx)
                                 {
                                     // Logs specific failures during throttle/button actions
-                                    LogToFile($"[Action Error] Offset: {update.Offset} | Msg: {actionEx.Message}");
+                                    LogToFile($"[Action Error] Offset: {currentOffset} | Msg: {actionEx.Message}");
                                 }
-                                
                             }
 
                             try
                             {
-                                binding.Controller.Updated?.Invoke(this, update);
+                                binding.Controller.Updated?.Invoke(this, RawState[currentOffset]);
                             }
                             catch (Exception invokeEx)
                             {
                                 LogToFile($"[Invoke Error] | Msg: {invokeEx.Message}");
                             }
-                            
                         }
                     }
                 }
