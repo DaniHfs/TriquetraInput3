@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <OutputType>Library</OutputType>
+    <AssemblyName>TriquetraInput3</AssemblyName>
     <RootNamespace>Triquetra.Input</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
