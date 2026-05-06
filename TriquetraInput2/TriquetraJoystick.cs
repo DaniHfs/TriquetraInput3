@@ -97,7 +97,7 @@ namespace Triquetra.Input
                                 catch (Exception actionEx)
                                 {
                                     // Logs specific failures during throttle/button actions
-                                    LogToFile($"[Triquetra][Action Error] Offset: {update.Offset} | Msg: {actionEx.Message}");
+                                    LogToFile($"[Action Error] Offset: {update.Offset} | Msg: {actionEx.Message}");
                                 }
                                 
                             }
@@ -108,7 +108,7 @@ namespace Triquetra.Input
                             }
                             catch (Exception invokeEx)
                             {
-                                LogToFile($"[Triquetra][Invoke Error] | Msg: {invokeEx.Message}");
+                                LogToFile($"[Invoke Error] | Msg: {invokeEx.Message}");
                             }
                             
                         }
@@ -118,7 +118,7 @@ namespace Triquetra.Input
             catch (Exception e)
             {
                 // Print full error including line number
-                LogToFile($"[Triquetra][CRITICAL POLL ERROR]\nMsg: {e.Message}\nStack Trace: {e.StackTrace}");
+                LogToFile($"[CRITICAL POLL ERROR]\nMsg: {e.Message}\nStack Trace: {e.StackTrace}");
                 UnityEngine.Debug.LogError("[Triquetra] Critical Failure in Poll. Check LocalAppData log.");
             }
         }
@@ -126,20 +126,7 @@ namespace Triquetra.Input
         // Custom logger
         private void LogToFile(string text)
         {
-            try
-            {
-                // Path: C:\Users\<Name>\AppData\Local\TriquetraInput\debug_log.txt
-                string logFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TriquetraInput");
-
-                if (!Directory.Exists(logFolder))
-                    Directory.CreateDirectory(logFolder);
-
-                string path = Path.Combine(logFolder, "debug_log.txt");
-                string logEntry = $"[{DateTime.Now:dd-MM-yyyy HH:mm:ss:fff}] {text}\n" + new string('-', 30) + "\n";
-
-                File.AppendAllText(path, logEntry);
-            }
-            catch {/* Avoid recursive crashes */}
+            UnityEngine.Debug.Log($"[TRIQUETRA] {text}");
         }
 
     }
