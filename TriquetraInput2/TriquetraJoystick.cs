@@ -98,7 +98,7 @@ namespace Triquetra.Input
                             // (Prevents "Sensor Jitter" from tanking FPS)
                             if (Math.Abs(currentValue - binding.LastValue) > 10) 
                             {
-                                // Error logger for new throttle bug
+                                // Error logger
                                 try
                                 {
                                     binding.RunAction(currentValue);
