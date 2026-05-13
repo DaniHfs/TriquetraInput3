@@ -67,9 +67,22 @@ namespace Triquetra.Input
 
         public new void Poll()
         {
-            if (!hasAcquired) 
-                Acquire();
-
+            // Hardware init shield
+            if (!hasAcquired)
+            {
+                try
+                {   
+                    Acquire();
+                
+                }
+                catch (Exception acquireEx)
+                {
+                    // Device is not plugged in
+                    LogToFile($"[Hardware Warning] Failed to acquire joystick device. Is it unplugged? Msg: {acquireEx.Message}");
+                    return; // Exit early to prevent crash
+                }
+            }
+                
             try 
             {
                 base.Poll();
