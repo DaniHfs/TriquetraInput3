@@ -41,15 +41,14 @@ namespace Triquetra.Input
             bool isPrimaryPressed = UnityEngine.Input.GetKey(PrimaryKey);
             bool isSecondaryPressed = UnityEngine.Input.GetKey(SecondaryKey);
 
-            if (isPrimaryPressed && !isSecondaryPressed)
-                t = (int)Mathf.Lerp(t, Binding.AxisMax, Time.deltaTime / Smoothing);
-            else if (isSecondaryPressed && !isPrimaryPressed)
-                t = (int)Mathf.Lerp(t, Binding.AxisMin, Time.deltaTime / Smoothing);
-            
-            if (!isPrimaryPressed && !isSecondaryPressed)
-                t = (int)Mathf.Lerp(t, Binding.AxisMiddle, Time.deltaTime / Smoothing);
-            
+            int targetValue = (isPrimaryPressed, isSecondaryPressed) switch
+            {
+                (true, false) => Binding.AxisMax,
+                (false, true) => Binding.AxisMin,
+                _ => Binding.AxisMiddle
+            };
 
+            t = (int)Mathf.Lerp(t, targetValue, Time.deltaTime / Smoothing);
             return t;
         }
     }

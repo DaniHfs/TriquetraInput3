@@ -185,34 +185,41 @@ namespace Triquetra.Input
             {
                 if (collectiveFunctions)
                 {
-                    if (binding.CombatCollective)
-                    {
-                    }
-                    else
-                    {
-                        if (!triggerPressed && binding.GetButtonPressed(joystickValue))
-                        {
-                            triggerPressed = true;
-                            collectiveFunctions.flightCollective.OnTriggerDown?.Invoke();
-                        }
-                        if (triggerPressed && !binding.GetButtonPressed(joystickValue))
-                        {
-                            triggerPressed = false;
-                            collectiveFunctions.flightCollective.OnTriggerUp?.Invoke();
-                        }
-                    }
+                    if (binding?.CombatCollective == true)
+                        return; // Combat collective handles trigger internally
+                    
+                    HandleTriggerForCollective(binding, joystickValue);
                     return;
                 }
                 
                 if (throttle == null)
                     return;
 
-                if (triggerPressed == false && binding.GetButtonPressed(joystickValue))
+                HandleTriggerForThrottle(binding, joystickValue);
+            }
+
+            private static void HandleTriggerForCollective(Binding binding, int joystickValue)
+            {
+                if (!triggerPressed && binding.GetButtonPressed(joystickValue))
+                {
+                    triggerPressed = true;
+                    collectiveFunctions.flightCollective.OnTriggerDown?.Invoke();
+                }
+                else if (triggerPressed && !binding.GetButtonPressed(joystickValue))
+                {
+                    triggerPressed = false;
+                    collectiveFunctions.flightCollective.OnTriggerUp?.Invoke();
+                }
+            }
+
+            private static void HandleTriggerForThrottle(Binding binding, int joystickValue)
+            {
+                if (!triggerPressed && binding.GetButtonPressed(joystickValue))
                 {
                     triggerPressed = true;
                     throttle.OnTriggerDown?.Invoke();
                 }
-                if (triggerPressed == true && !binding.GetButtonPressed(joystickValue))
+                else if (triggerPressed && !binding.GetButtonPressed(joystickValue))
                 {
                     triggerPressed = false;
                     throttle.OnTriggerUp?.Invoke();
@@ -227,54 +234,63 @@ namespace Triquetra.Input
             {
                 if (collectiveFunctions)
                 {
-                    if (binding.CombatCollective)
-                    {
-                        if (Helicopter.collectiveModded)
-                        {
-                            collectiveFunctions.CombatOnTriggerDown();
-                            collectiveFunctions.combatCollective.triggerIsDown = true;
-                        }
-
-                        if (binding.GetButtonPressed(joystickValue))
-                        {
-                            collectiveFunctions.CombatOnStickPressed();
-                        }
-                        if (thumbstickButtonPressed == false && binding.GetButtonPressed(joystickValue))
-                        {
-                            thumbstickButtonPressed = true;
-                            collectiveFunctions.CombatOnStickPressDown();
-                        }
-                        if (thumbstickButtonPressed == true && !binding.GetButtonPressed(joystickValue))
-                        {
-                            thumbstickButtonPressed = false;
-                            collectiveFunctions.CombatOnStickPressUp();
-                        }
-                        
-                        if (Helicopter.collectiveModded)
-                        {
-                            collectiveFunctions.CombatOnTriggerUp();
-                            collectiveFunctions.combatCollective.triggerIsDown = false;
-                        }
-                    }
+                    if (binding?.CombatCollective == true)
+                        HandleCombatThumbstickButton(binding, joystickValue);
                     else
-                    {
                         collectiveFunctions.FlightMenuButtonDown();
-                    }
                     return;
                 }
+
                 if (throttle == null)
                     return;
 
+                HandleStandardThumbstickButton(binding, joystickValue);
+            }
+
+            private static void HandleCombatThumbstickButton(Binding binding, int joystickValue)
+            {
+                if (Helicopter.collectiveModded)
+                {
+                    collectiveFunctions.CombatOnTriggerDown();
+                    collectiveFunctions.combatCollective.triggerIsDown = true;
+                }
+
+                if (binding.GetButtonPressed(joystickValue))
+                {
+                    collectiveFunctions.CombatOnStickPressed();
+                }
+
+                if (!thumbstickButtonPressed && binding.GetButtonPressed(joystickValue))
+                {
+                    thumbstickButtonPressed = true;
+                    collectiveFunctions.CombatOnStickPressDown();
+                }
+                else if (thumbstickButtonPressed && !binding.GetButtonPressed(joystickValue))
+                {
+                    thumbstickButtonPressed = false;
+                    collectiveFunctions.CombatOnStickPressUp();
+                }
+
+                if (Helicopter.collectiveModded)
+                {
+                    collectiveFunctions.CombatOnTriggerUp();
+                    collectiveFunctions.combatCollective.triggerIsDown = false;
+                }
+            }
+
+            private static void HandleStandardThumbstickButton(Binding binding, int joystickValue)
+            {
                 if (binding.GetButtonPressed(joystickValue))
                 {
                     throttle.OnStickPressed?.Invoke();
                 }
-                if (thumbstickButtonPressed == false && binding.GetButtonPressed(joystickValue))
+
+                if (!thumbstickButtonPressed && binding.GetButtonPressed(joystickValue))
                 {
                     thumbstickButtonPressed = true;
                     throttle.OnStickPressDown?.Invoke();
                 }
-                if (thumbstickButtonPressed == true && !binding.GetButtonPressed(joystickValue))
+                else if (thumbstickButtonPressed && !binding.GetButtonPressed(joystickValue))
                 {
                     thumbstickButtonPressed = false;
                     throttle.OnStickPressUp?.Invoke();
@@ -292,102 +308,86 @@ namespace Triquetra.Input
                 if (throttle == null)
                     return;
 
-                Vector3 vector = new Vector3();
-                if (ThumbstickRight)
-                    vector.x += 1;
-                if (ThumbstickLeft)
-                    vector.x -= 1;
-                if (ThumbstickUp)
-                    vector.y += 1;
-                if (ThumbstickDown)
-                    vector.y -= 1;
-                
-                if (collectiveFunctions && binding != null)
-                {
-                    if (binding.CombatCollective)
-                    {
-                        if (Helicopter.collectiveModded)
-                        {
-                            collectiveFunctions.CombatOnTriggerDown();
-                            collectiveFunctions.combatCollective.triggerIsDown = true;
-                        }
-                        
-                        if (vector != Vector3.zero)
-                        {
-                            thumbstickWasZero = false;
-                            collectiveFunctions.CombatOnSetThumbstick(vector);
-                            thumbstickWasMoving = true;
-                        }
-                        else
-                        {
-                            if (!thumbstickWasZero)
-                            {
-                                collectiveFunctions.CombatOnSetThumbstick(vector);
-                                thumbstickWasZero = true;
-                                thumbstickWasMoving = true;
-                            }
-                            else if (thumbstickWasMoving)
-                            {
-                                collectiveFunctions.CombatOnResetThumbstick();
-                                thumbstickWasMoving = false;
-                            }
-                        }
-                        
-                        if (Helicopter.collectiveModded)
-                        {
-                            collectiveFunctions.CombatOnTriggerUp();
-                            collectiveFunctions.combatCollective.triggerIsDown = false;
-                        }
-                    }
-                    else
-                    {
-                        collectiveFunctions.OnFlightCollectiveThumbstick(vector);
-                    }
-                    return;
+                // Convert the boolean button states into 1.0f or 0.0f numerical values
+                float x = (ThumbstickRight ? 1.0f : 0.0f) - (ThumbstickLeft ? 1.0f : 0.0f);
+                float y = (ThumbstickUp ? 1.0f : 0.0f) - (ThumbstickDown ? 1.0f : 0.0f);
+
+                Vector3 vector = new Vector3(x, y, 0);
+
+                if (collectiveFunctions && binding?.CombatCollective == true)
+                    UpdateCombatThumbstick(vector);
+                else if (collectiveFunctions && binding != null)
+                    collectiveFunctions.OnFlightCollectiveThumbstick(vector);
+                else
+                    UpdateStandardThumbstick(vector);
                 }
 
+            private static void UpdateCombatThumbstick(Vector3 vector)
+            {
+                if (Helicopter.collectiveModded)
+                {
+                    collectiveFunctions.CombatOnTriggerDown();
+                    collectiveFunctions.combatCollective.triggerIsDown = true;
+                }
+
+                if (vector != Vector3.zero)
+                {
+                    thumbstickWasZero = false;
+                    collectiveFunctions.CombatOnSetThumbstick(vector);
+                    thumbstickWasMoving = true;
+                }
+                else if (!thumbstickWasZero)
+                {
+                    collectiveFunctions.CombatOnSetThumbstick(vector);
+                    thumbstickWasZero = true;
+                    thumbstickWasMoving = true;
+                }
+                else if (thumbstickWasMoving)
+                {
+                    collectiveFunctions.CombatOnResetThumbstick();
+                    thumbstickWasMoving = false;
+                }
+
+                if (Helicopter.collectiveModded)
+                {
+                    collectiveFunctions.CombatOnTriggerUp();
+                    collectiveFunctions.combatCollective.triggerIsDown = false;
+                }
+            }
+
+            private static void UpdateStandardThumbstick(Vector3 vector)
+            {
                 if (vector != Vector3.zero)
                 {
                     thumbstickWasZero = false;
                     throttle.OnSetThumbstick?.Invoke(vector);
                     thumbstickWasMoving = true;
                 }
-                else
+                else if (!thumbstickWasZero)
                 {
-                    if (!thumbstickWasZero)
-                    {
-                        throttle.OnSetThumbstick?.Invoke(vector);
-                        thumbstickWasZero = true;
-                        thumbstickWasMoving = true;
-                    }
-                    else if (thumbstickWasMoving)
-                    {
-                        throttle.OnResetThumbstick?.Invoke();
-                        thumbstickWasMoving = false;
-                    }
+                    throttle.OnSetThumbstick?.Invoke(vector);
+                    thumbstickWasZero = true;
+                    thumbstickWasMoving = true;
+                }
+                else if (thumbstickWasMoving)
+                {
+                    throttle.OnResetThumbstick?.Invoke();
+                    thumbstickWasMoving = false;
                 }
             }
 
             public static void Thumbstick(Binding binding, int joystickValue)
             {
-                switch (binding.ThumbstickDirection)
+                Action action = binding.ThumbstickDirection switch
                 {
-                    case ThumbstickDirection.Up:
-                        ThumbstickUp = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Down:
-                        ThumbstickDown = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Right:
-                        ThumbstickRight = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Left:
-                        ThumbstickLeft = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Press:
-                        ThumbstickButton(binding, joystickValue);
-                        break;
-                }
+                    ThumbstickDirection.Up => () => ThumbstickUp = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Down => () => ThumbstickDown = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Right => () => ThumbstickRight = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Left => () => ThumbstickLeft = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Press => () => ThumbstickButton(binding, joystickValue),
+                    _ => () => {/* Default case */ }
+                };
+                action();
                 UpdateThumbstick(binding);
             }
             #endregion
@@ -397,46 +397,53 @@ namespace Triquetra.Input
             {
                 if (collectiveFunctions)
                 {
-                    if (binding.CombatCollective)
-                    {
-                        if (Helicopter.collectiveModded)
-                        {
-                            collectiveFunctions.CombatOnTriggerDown();
-                            collectiveFunctions.combatCollective.triggerIsDown = true;
-                        }
-                        
-                        if (cmPressed == false && binding.GetButtonPressed(joystickValue))
-                        {
-                            cmPressed = true;
-                            collectiveFunctions.CombatMenuButtonDown();
-                        }
-                        if (cmPressed == true && !binding.GetButtonPressed(joystickValue))
-                        {
-                            cmPressed = false;
-                            collectiveFunctions.CombatMenuButtonUp();
-                        }
-                        
-                        if (Helicopter.collectiveModded)
-                        {
-                            collectiveFunctions.CombatOnTriggerUp();
-                            collectiveFunctions.combatCollective.triggerIsDown = false;
-                        }
-                    }
+                    if (binding?.CombatCollective == true)
+                        HandleCombatCountermeasures(binding, joystickValue);
                     else
-                    {
                         collectiveFunctions.FlightMenuButtonDown();
-                    }
                     return;
                 }
+
                 if (throttle == null)
                     return;
 
-                if (cmPressed == false && binding.GetButtonPressed(joystickValue))
+                HandleStandardCountermeasures(binding, joystickValue);
+            }
+
+            private static void HandleCombatCountermeasures(Binding binding, int joystickValue)
+            {
+                if (Helicopter.collectiveModded)
+                {
+                    collectiveFunctions.CombatOnTriggerDown();
+                    collectiveFunctions.combatCollective.triggerIsDown = true;
+                }
+
+                if (!cmPressed && binding.GetButtonPressed(joystickValue))
+                {
+                    cmPressed = true;
+                    collectiveFunctions.CombatMenuButtonDown();
+                }
+                else if (cmPressed && !binding.GetButtonPressed(joystickValue))
+                {
+                    cmPressed = false;
+                    collectiveFunctions.CombatMenuButtonUp();
+                }
+
+                if (Helicopter.collectiveModded)
+                {
+                    collectiveFunctions.CombatOnTriggerUp();
+                    collectiveFunctions.combatCollective.triggerIsDown = false;
+                }
+            }
+
+            private static void HandleStandardCountermeasures(Binding binding, int joystickValue)
+            {
+                if (!cmPressed && binding.GetButtonPressed(joystickValue))
                 {
                     cmPressed = true;
                     throttle.OnMenuButtonDown?.Invoke();
                 }
-                if (cmPressed == true && !binding.GetButtonPressed(joystickValue))
+                else if (cmPressed && !binding.GetButtonPressed(joystickValue))
                 {
                     cmPressed = false;
                     throttle.OnMenuButtonUp?.Invoke();
@@ -512,16 +519,17 @@ namespace Triquetra.Input
                 if (joystick == null)
                     return;
 
-                if (triggerPressed == false && binding.GetButtonPressed(joystickValue))
+                if (!triggerPressed && binding.GetButtonPressed(joystickValue))
                 {
                     triggerPressed = true;
                     joystick.OnTriggerDown?.Invoke();
                 }
-                if (triggerPressed == true && !binding.GetButtonPressed(joystickValue))
+                else if (triggerPressed && !binding.GetButtonPressed(joystickValue))
                 {
                     triggerPressed = false;
                     joystick.OnTriggerUp?.Invoke();
                 }
+
                 joystick.OnTriggerAxis?.Invoke(binding.GetAxisAsFloat(joystickValue));
             }
 
@@ -533,15 +541,14 @@ namespace Triquetra.Input
                     return;
 
                 if (binding.GetButtonPressed(joystickValue))
-                {
                     joystick.OnThumbstickButton?.Invoke();
-                }
-                if (thumbstickButtonPressed == false && binding.GetButtonPressed(joystickValue))
+
+                if (!thumbstickButtonPressed && binding.GetButtonPressed(joystickValue))
                 {
                     thumbstickButtonPressed = true;
                     joystick.OnThumbstickButtonDown?.Invoke();
                 }
-                if (thumbstickButtonPressed == true && !binding.GetButtonPressed(joystickValue))
+                else if (thumbstickButtonPressed && !binding.GetButtonPressed(joystickValue))
                 {
                     thumbstickButtonPressed = false;
                     joystick.OnThumbstickButtonUp?.Invoke();
@@ -559,15 +566,11 @@ namespace Triquetra.Input
                 if (joystick == null)
                     return;
 
-                Vector3 vector = new Vector3();
-                if (ThumbstickRight)
-                    vector.x += 1;
-                if (ThumbstickLeft)
-                    vector.x -= 1;
-                if (ThumbstickUp)
-                    vector.y += 1;
-                if (ThumbstickDown)
-                    vector.y -= 1;
+                // Convert the boolean button states into 1.0f or 0.0f numerical values
+                float x = (ThumbstickRight ? 1.0f : 0.0f) - (ThumbstickLeft ? 1.0f : 0.0f);
+                float y = (ThumbstickUp ? 1.0f : 0.0f) - (ThumbstickDown ? 1.0f : 0.0f);
+
+                Vector3 vector = new Vector3(x, y, 0);
 
                 if (vector != Vector3.zero)
                 {
@@ -575,42 +578,32 @@ namespace Triquetra.Input
                     joystick.OnSetThumbstick?.Invoke(vector);
                     thumbstickWasMoving = true;
                 }
-                else
+                else if (!thumbstickWasZero)
                 {
-                    if (!thumbstickWasZero)
-                    {
-                        joystick.OnSetThumbstick?.Invoke(vector);
-                        thumbstickWasZero = true;
-                        thumbstickWasMoving = true;
-                    }
-                    else if (thumbstickWasMoving)
-                    {
-                        joystick.OnResetThumbstick?.Invoke();
-                        thumbstickWasMoving = false;
-                    }
+                    joystick.OnSetThumbstick?.Invoke(vector);
+                    thumbstickWasZero = true;
+                    thumbstickWasMoving = true;
+                }
+                else if (thumbstickWasMoving)
+                {
+                    joystick.OnResetThumbstick?.Invoke();
+                    thumbstickWasMoving = false;
                 }
             }
 
             public static void Thumbstick(Binding binding, int joystickValue)
             {
-                switch (binding.ThumbstickDirection)
+                Action action = binding.ThumbstickDirection switch
                 {
-                    case ThumbstickDirection.Up:
-                        ThumbstickUp = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Down:
-                        ThumbstickDown = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Right:
-                        ThumbstickRight = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Left:
-                        ThumbstickLeft = binding.GetButtonPressed(joystickValue);
-                        break;
-                    case ThumbstickDirection.Press:
-                        ThumbstickButton(binding, joystickValue);
-                        break;
-                }
+                    ThumbstickDirection.Up => () => ThumbstickUp = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Down => () => ThumbstickDown = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Right => () => ThumbstickRight = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Left => () => ThumbstickLeft = binding.GetButtonPressed(joystickValue),
+                    ThumbstickDirection.Press => () => ThumbstickButton(binding, joystickValue),
+                    _ => () => {/* Default case */ }
+                };
+                action();
+                UpdateThumbstick();
             }
             #endregion
 
@@ -662,10 +655,8 @@ namespace Triquetra.Input
                     return;
 
                 Vector2 vector = new Vector2();
-                vector.x += ThumbstickRight;
-                vector.x -= ThumbstickLeft;
-                vector.y += ThumbstickUp;
-                vector.y -= ThumbstickDown;
+                vector.x += ThumbstickRight - ThumbstickLeft;
+                vector.y += ThumbstickUp - ThumbstickDown;
 
                 if (vector != Vector2.zero)
                 {
@@ -673,39 +664,31 @@ namespace Triquetra.Input
                     modVariables.TrySetValue("RotateCamera", vector);
                     thumbstickWasMoving = true;
                 }
-                else
+                else if (!thumbstickWasZero)
                 {
-                    if (!thumbstickWasZero)
-                    {
-                        modVariables.TrySetValue("RotateCamera", vector);
-                        thumbstickWasZero = true;
-                        thumbstickWasMoving = true;
-                    }
-                    else if (thumbstickWasMoving)
-                    {
-                        modVariables.TrySetValue("RotateCamera", Vector2.zero);
-                        thumbstickWasMoving = false;
-                    }
+                    modVariables.TrySetValue("RotateCamera", vector);
+                    thumbstickWasZero = true;
+                    thumbstickWasMoving = true;
+                }
+                else if (thumbstickWasMoving)
+                {
+                    modVariables.TrySetValue("RotateCamera", Vector2.zero);
+                    thumbstickWasMoving = false;
                 }
             }
 
             public static void Thumbstick(Binding binding, int joystickValue)
             {
-                switch (binding.ThumbstickDirection)
+                Action action = binding.ThumbstickDirection switch
                 {
-                    case ThumbstickDirection.Up:
-                        ThumbstickUp = binding.GetAxisAsFloat(joystickValue);
-                        break;
-                    case ThumbstickDirection.Down:
-                        ThumbstickDown = binding.GetAxisAsFloat(joystickValue);
-                        break;
-                    case ThumbstickDirection.Right:
-                        ThumbstickRight = binding.GetAxisAsFloat(joystickValue);
-                        break;
-                    case ThumbstickDirection.Left:
-                        ThumbstickLeft = binding.GetAxisAsFloat(joystickValue);
-                        break;
-                }
+                    ThumbstickDirection.Up => () => ThumbstickUp = binding.GetAxisAsFloat(joystickValue),
+                    ThumbstickDirection.Down => () => ThumbstickDown = binding.GetAxisAsFloat(joystickValue),
+                    ThumbstickDirection.Right => () => ThumbstickRight = binding.GetAxisAsFloat(joystickValue),
+                    ThumbstickDirection.Left => () => ThumbstickLeft = binding.GetAxisAsFloat(joystickValue),
+                    _ => () => {/* Default case */ }
+                };
+
+                action();
             }
             #endregion
         }

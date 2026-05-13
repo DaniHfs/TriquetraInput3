@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29926.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TriquetraInput2", "TriquetraInput2\TriquetraInput2.csproj", "{7BB21F11-6675-4E25-AB78-E420A6B129C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TriquetraInput3", "TriquetraInput3\TriquetraInput3.csproj", "{7BB21F11-6675-4E25-AB78-E420A6B129C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

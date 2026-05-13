@@ -44,94 +44,73 @@ namespace Triquetra.Input.CustomHandController
 
         public override void Update()
         {
+            SyncInternalState();
+            UpdateButtonStates();
+            HandleDestruction();
+        }
+
+        private void SyncInternalState()
+        {
             stickAxis = _stickAxis;
             stickPressed = _stickPressed;
             triggerAxis = _triggerAxis;
             thumbButtonPressed = _primaryPressed;
             secondaryThumbButtonPressed = _secondaryPressed;
             triggerClicked = _triggerPressed;
-            
+        }
+
+        private void UpdateButtonStates()
+        {
             UpdateStickButton();
             UpdatePrimaryButton();
             UpdateSecondaryButton();
             UpdateTriggerButton();
-            
-            
-            
+        }
+
+        private void HandleDestruction()
+        {
             if (_destroyNextFrame)
             {
-                if (activeInteractable)
-                    activeInteractable.UnClick(this);
+                activeInteractable?.UnClick(this);
                 Destroy(gameObject);
             }
             else
                 _destroyNextFrame = markedForDestruction;
         }
 
-        public void UpdateStickButton()
+        public void UpdateStickButton() => UpdateButtonState(stickPressed, ref wasStickPressed, 
+            (value) => { stickPressDown = value; }, (value) => { stickPressUp = value; });
+
+        public void UpdatePrimaryButton() => UpdateButtonState(thumbButtonPressed, ref wasPrimaryButtonPressed,
+            (value) => { primaryButtonDown = value; }, (value) => { primaryButtonUp = value; });
+
+        public void UpdateSecondaryButton() => UpdateButtonState(secondaryThumbButtonPressed, ref wasSecondaryButtonPressed,
+            (value) => { secondaryButtonDown = value; }, (value) => { secondaryButtonUp = value; });
+
+        public void UpdateTriggerButton() => UpdateButtonState(triggerClicked, ref wasTriggerButtonPressed,
+            (value) => { triggerButtonDown = value; }, (value) => { triggerButtonUp = value; });
+
+        private static void UpdateButtonState(bool isPressed, ref bool wasPressed, Action<bool> setDown, Action<bool> setUp)
         {
-            if (stickPressed)
+            if (isPressed)
             {
-                stickPressDown = !wasStickPressed;
-                wasStickPressed = true;
+                setDown(!wasPressed);
+                wasPressed = true;
             }
             else
             {
-                stickPressUp = wasStickPressed;
-                wasStickPressed = false;
-            }
-        }
-
-        public void UpdatePrimaryButton()
-        {
-            if (thumbButtonPressed)
-            {
-                primaryButtonDown = !wasPrimaryButtonPressed;
-                wasPrimaryButtonPressed = true;
-            }
-            else
-            {
-                primaryButtonUp = wasPrimaryButtonPressed;
-                wasPrimaryButtonPressed = false;
-            }
-        }
-
-
-        public void UpdateSecondaryButton()
-        {
-            if (secondaryThumbButtonPressed)
-            {
-                secondaryButtonDown = !wasSecondaryButtonPressed;
-                wasSecondaryButtonPressed = true;
-            }
-            else
-            {
-                secondaryButtonUp = wasSecondaryButtonPressed;
-                wasSecondaryButtonPressed = false;
-            }
-        }
-
-        public void UpdateTriggerButton()
-        {
-            if (triggerClicked)
-            {
-                triggerButtonDown = !wasTriggerButtonPressed;
-                wasTriggerButtonPressed = true;
-            }
-            else
-            {
-                triggerButtonUp = wasTriggerButtonPressed;
-                wasTriggerButtonPressed = false;
+                setUp(wasPressed);
+                wasPressed = false;
             }
         }
 
         public override void OnEnable()
         {
-            if (controllers == null)
-            {
-                controllers = new List<VRHandController>();
-            }
-            if (interactionTransform) return;
+            controllers ??= new List<VRHandController>();
+            
+            if (interactionTransform)
+                return;
+
             interactionTransform = new GameObject("interactionTf").transform;
             interactionTransform.parent = transform;
             interactionTransform.localPosition = Vector3.zero;

@@ -44,9 +44,9 @@ namespace Triquetra.Input
             imguiObject.AddComponent<TriquetraInputBinders>();
             GameObject.DontDestroyOnLoad(imguiObject);
 
-            bindingsPath = PilotSaveManager.saveDataPath + "/triquetrainput.xml";
-            jsonBindingsPath = PilotSaveManager.saveDataPath + "/triquetrainput.json";
-            //LoadBindings();
+            string basePath = PilotSaveManager.saveDataPath;
+            bindingsPath = Path.Combine(basePath, "triquetrainput.xml");
+            jsonBindingsPath = Path.Combine(basePath, "triquetrainput.json");
             StartCoroutine(LoadBindingsCoroutine());
         }
 
@@ -59,47 +59,49 @@ namespace Triquetra.Input
         public static bool IsFlyingScene()
         {
             int buildIndex = SceneManager.GetActiveScene().buildIndex;
-            return buildIndex == 7 || buildIndex == 11;
+            return buildIndex is 7 or 11;
         }
 
         public static void SaveBindings()
         {
-            /*if (Binding.Bindings != null)
+            try
             {
-                var json = JsonConvert.SerializeObject(Binding.Bindings, Formatting.Indented);
-                File.WriteAllText(jsonBindingsPath, json);
-            }*/
-            XmlSerializer serializer = new XmlSerializer(Binding.Bindings.GetType());
-            using (StringWriter writer = new StringWriter())
-            {
-                serializer.Serialize(writer, Binding.Bindings);
-                Debug.Log(writer.ToString());
+                XmlSerializer serializer = new XmlSerializer(Binding.Bindings.GetType());
+                using (StringWriter debugWriter = new StringWriter())
+                {
+                    serializer.Serialize(debugWriter, Binding.Bindings);
+                    Debug.Log(debugWriter.ToString());
+                }
+
+                using (TextWriter fileWriter = new StreamWriter(bindingsPath))
+                {
+                    serializer.Serialize(fileWriter, Binding.Bindings);
+                }
             }
-            using (TextWriter writer = new StreamWriter(bindingsPath))
+            catch (Exception ex)
             {
-                serializer.Serialize(writer, Binding.Bindings);
+                Debug.LogError($"Error saving bindings: {ex.Message}");
             }
         }
 
         public static void LoadBindings()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            XmlSerializer serializer = new XmlSerializer(typeof(List<Binding>));
-            if (File.Exists(bindingsPath))
+            if (!File.Exists(bindingsPath))
+                return;
+
+            try
             {
+                XmlSerializer serializer = new XmlSerializer(typeof(List<Binding>));
                 using (Stream reader = new FileStream(bindingsPath, FileMode.Open))
                 {
-                    Binding.Bindings = (List<Binding>)serializer.Deserialize(reader);
+                    Binding.Bindings = (List<Binding>)serializer.Deserialize(reader) ?? new List<Binding>();
                 }
             }
-            
-            /*if (File.Exists(jsonBindingsPath))
+            catch (Exception ex)
             {
-                var text = File.ReadAllText(jsonBindingsPath);
-                if (String.IsNullOrEmpty(text))
-                    return;
-                Binding.Bindings = JsonConvert.DeserializeObject<List<Binding>>(text);
-            }*/
+                Debug.LogError($"Error loading bindings: {ex.Message}");
+                Binding.Bindings = new List<Binding>();
+            }
         }
 
         private static IEnumerator LoadBindingsCoroutine()
@@ -113,16 +115,24 @@ namespace Triquetra.Input
             asyncLoadingBindings = false;
         }
 
-        private static async Task AsyncLoadBindings() // I have no clue if this is even any faster than normal
+        private static async Task AsyncLoadBindings()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(List<Binding>));
-            if (File.Exists(bindingsPath))
+            if (!File.Exists(bindingsPath))
+                return;
+
+            try
             {
+                XmlSerializer serializer = new XmlSerializer(typeof(List<Binding>));
                 using (Stream reader = new FileStream(bindingsPath, FileMode.Open))
                 {
                     var bindings = await Task.Run(() => (List<Binding>)serializer.Deserialize(reader));
-                    Binding.Bindings = bindings;
+                    Binding.Bindings = bindings ?? new List<Binding>();
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error loading bindings asynchronously: {ex.Message}");
+                Binding.Bindings = new List<Binding>();
             }
         }
 
