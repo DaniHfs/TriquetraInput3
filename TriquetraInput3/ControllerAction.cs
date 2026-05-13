@@ -66,9 +66,7 @@ namespace Triquetra.Input
             }
 
             internal static CockpitTeamRadioManager FindRadioManager()
-            {
-                return GameObject.FindObjectOfType<CockpitTeamRadioManager>();
-            }
+                => GameObject.FindObjectOfType<CockpitTeamRadioManager>();
         }
         public static class Helmet
         {
@@ -93,9 +91,7 @@ namespace Triquetra.Input
             }
 
             private static HelmetController FindHelmetController()
-            {
-                return GameObject.FindObjectsOfType<HelmetController>(false).First();
-            }
+                => GameObject.FindObjectsOfType<HelmetController>(false).First();
         }
 
         public static class Flaps
@@ -125,9 +121,8 @@ namespace Triquetra.Input
             }
 
             internal static VRLever FindFlaps()
-            {
-                return GameObject.FindObjectsOfType<VRLever>(false).Where(l => l?.GetComponent<VRInteractable>()?.interactableName == "Flaps").FirstOrDefault();
-            }
+                => GameObject.FindObjectsOfType<VRLever>(false).Where(l => l?.GetComponent<VRInteractable>()?.interactableName == "Flaps").FirstOrDefault();
+
         }
 
         // TODO: countermeasures, alt. controls (from holding trigger on throttle)
@@ -154,18 +149,27 @@ namespace Triquetra.Input
             }
 
             internal static VRThrottle FindThrottle()
-            {
-                return GameObject.FindObjectsOfType<VRThrottle>(false).Where(t => t.interactable?.interactableName == "Power").FirstOrDefault();
-            }
+                => GameObject.FindObjectsOfType<VRThrottle>(false).Where(t => t.interactable?.interactableName == "Power").FirstOrDefault();
         }
 
         public static class Throttle
         {
             internal static VRThrottle throttle;
             internal static AH94CollectiveFunctions collectiveFunctions;
+
+            // Unified helper to ensure visual control links are initialized dynamically at scene start
+            private static void EnsureThrottleReference()
+            {
+                if (throttle == null)
+                    throttle = FindThrottle();
+                if (collectiveFunctions == null)
+                    collectiveFunctions = FindCollective();
+            }
             
             public static void SetThrottle(Binding binding, int joystickValue)
             {
+                EnsureThrottleReference();
+
                 if (throttle == null)
                     return;
 
@@ -174,6 +178,8 @@ namespace Triquetra.Input
 
             public static void MoveThrottle(Binding binding, int joystickValue, float delta)
             {
+                EnsureThrottleReference();
+
                 if (throttle == null)
                     return;
 
@@ -183,6 +189,8 @@ namespace Triquetra.Input
             private static bool triggerPressed = false;
             public static void TriggerBrakes(Binding binding, int joystickValue)
             {
+                EnsureThrottleReference();
+
                 if (collectiveFunctions)
                 {
                     if (binding?.CombatCollective == true)
@@ -200,6 +208,9 @@ namespace Triquetra.Input
 
             private static void HandleTriggerForCollective(Binding binding, int joystickValue)
             {
+                if (collectiveFunctions?.flightCollective == null)
+                    return;
+
                 if (!triggerPressed && binding.GetButtonPressed(joystickValue))
                 {
                     triggerPressed = true;
@@ -214,6 +225,9 @@ namespace Triquetra.Input
 
             private static void HandleTriggerForThrottle(Binding binding, int joystickValue)
             {
+                if (throttle == null)
+                    return;
+
                 if (!triggerPressed && binding.GetButtonPressed(joystickValue))
                 {
                     triggerPressed = true;
@@ -232,6 +246,8 @@ namespace Triquetra.Input
             private static bool thumbstickButtonPressed = false;
             public static void ThumbstickButton(Binding binding, int joystickValue)
             {
+                EnsureThrottleReference();
+
                 if (collectiveFunctions)
                 {
                     if (binding?.CombatCollective == true)
@@ -249,6 +265,9 @@ namespace Triquetra.Input
 
             private static void HandleCombatThumbstickButton(Binding binding, int joystickValue)
             {
+                if (collectiveFunctions?.combatCollective == null)
+                    return;
+
                 if (Helicopter.collectiveModded)
                 {
                     collectiveFunctions.CombatOnTriggerDown();
@@ -280,6 +299,9 @@ namespace Triquetra.Input
 
             private static void HandleStandardThumbstickButton(Binding binding, int joystickValue)
             {
+                if (throttle == null)
+                    return;
+                
                 if (binding.GetButtonPressed(joystickValue))
                 {
                     throttle.OnStickPressed?.Invoke();
@@ -305,7 +327,9 @@ namespace Triquetra.Input
             private static bool thumbstickWasMoving = false;
             public static void UpdateThumbstick(Binding binding = null)
             {
-                if (throttle == null)
+                EnsureThrottleReference();
+
+                if (throttle == null && collectiveFunctions == null)
                     return;
 
                 // Convert the boolean button states into 1.0f or 0.0f numerical values
@@ -324,6 +348,9 @@ namespace Triquetra.Input
 
             private static void UpdateCombatThumbstick(Vector3 vector)
             {
+                if (collectiveFunctions?.combatCollective == null)
+                    return;
+                
                 if (Helicopter.collectiveModded)
                 {
                     collectiveFunctions.CombatOnTriggerDown();
@@ -357,6 +384,9 @@ namespace Triquetra.Input
 
             private static void UpdateStandardThumbstick(Vector3 vector)
             {
+                if (throttle == null)
+                    return;
+                
                 if (vector != Vector3.zero)
                 {
                     thumbstickWasZero = false;
@@ -395,6 +425,8 @@ namespace Triquetra.Input
             private static bool cmPressed = false;
             public static void Countermeasures(Binding binding, int joystickValue)
             {
+                EnsureThrottleReference();
+
                 if (collectiveFunctions)
                 {
                     if (binding?.CombatCollective == true)
@@ -412,6 +444,9 @@ namespace Triquetra.Input
 
             private static void HandleCombatCountermeasures(Binding binding, int joystickValue)
             {
+                if (collectiveFunctions == null)
+                    return;
+                
                 if (Helicopter.collectiveModded)
                 {
                     collectiveFunctions.CombatOnTriggerDown();
@@ -429,7 +464,7 @@ namespace Triquetra.Input
                     collectiveFunctions.CombatMenuButtonUp();
                 }
 
-                if (Helicopter.collectiveModded)
+                if (Helicopter.collectiveModded && collectiveFunctions.combatCollective != null)
                 {
                     collectiveFunctions.CombatOnTriggerUp();
                     collectiveFunctions.combatCollective.triggerIsDown = false;
@@ -438,6 +473,9 @@ namespace Triquetra.Input
 
             private static void HandleStandardCountermeasures(Binding binding, int joystickValue)
             {
+                if (throttle == null)
+                    return;
+                
                 if (!cmPressed && binding.GetButtonPressed(joystickValue))
                 {
                     cmPressed = true;
@@ -460,7 +498,7 @@ namespace Triquetra.Input
                     
                     if (nonPower != null)
                         return nonPower;
-                    return throttles[0];
+                    return throttles.Length > 0 ? throttles[0] : null; // Safe array access
                 }
                 return null;
             }
@@ -475,7 +513,8 @@ namespace Triquetra.Input
                     if (nonPower != null)
                     {
                         collectiveFunctions = nonPower.GetComponentInParent<AH94CollectiveFunctions>();
-                        if (nonPower != null)
+                        
+                        if (collectiveFunctions != null)
                             return collectiveFunctions;
                     }
                 }
@@ -487,23 +526,36 @@ namespace Triquetra.Input
         {
             internal static VRJoystick joystick;
             private static Vector3 stickVector = new Vector3(0, 0, 0);
+
+            // Helper to ensure the 3D model link is verified before processing input
+            private static void EnsureJoystickReference()
+            {
+                if (joystick == null)
+                    joystick = FindJoystick();
+            }
             public static void SetPitch(Binding binding, int joystickValue)
-            {
+            {   
+                EnsureJoystickReference();
                 stickVector.x = binding.GetAxisAsFloat(joystickValue) - 0.5f;
+                UpdateStick();
             }
+            
             public static void SetYaw(Binding binding, int joystickValue)
-            {
+            {   
+                EnsureJoystickReference();
                 stickVector.y = binding.GetAxisAsFloat(joystickValue) - 0.5f;
+                UpdateStick();
             }
+
             public static void SetRoll(Binding binding, int joystickValue)
-            {
+            {   
+                EnsureJoystickReference();
                 stickVector.z = binding.GetAxisAsFloat(joystickValue) - 0.5f;
+                UpdateStick();
             }
 
             public static Vector3 GetStick()
-            {
-                return stickVector * 2;
-            }
+                => stickVector * 2;
 
             public static void UpdateStick()
             {
